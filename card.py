@@ -1,6 +1,11 @@
-# TODO
-# 1. when you bet credit = credit - bet
+# TO DO
+# 1. insert coins and after insert bets
 # 2. add labet credit and bet
+# 3. import what we need not all library
+# 4. add all cards
+# 6. improve aspect
+# 7. dupa win daca modifici betul se modifica si cat incasezi state=disabled
+
 
 from tkinter import *
 import random
@@ -51,9 +56,17 @@ class Table:
         )
         self.cashOut.grid(pady=20, ipady=10)
 
-        # create BET button
+        # create BET entry
         self.bet = Entry(master, justify=CENTER)
         self.bet.grid()
+
+        # create INFO
+        self.info = Entry(master,
+                          justify=CENTER,
+                          state=DISABLED,
+                          disabledbackground="orange",
+                          disabledforeground="white")
+        self.info.grid(column=1, ipadx=20)
 
         # make grid system
         count = 0
@@ -68,29 +81,56 @@ class Table:
         self.trigger = False
 
     def click(self, color):
-        if len(self.credit.get()) == 0 or len(self.bet.get()) == 0:
+        if len(self.credit.get()) == 0:
             print("Please insert coins first!")
+            self.infoDisplay("Please insert coins first!", "orange")
+        elif len(self.bet.get()) == 0:
+            print("Please bet first!")
+            self.infoDisplay("Please bet first!", "orange")
         elif int(self.bet.get()) > int(self.credit.get()):
             print("You don't have enough credit!")
+            self.infoDisplay("You don't have enough credit!", "orange")
         else:
-            print("What button was pressed?", color)
             chance = random.randint(1, 10)
             print(chance)
+            self.takeCredit()
             self.flipCard(chance)
             self.checkWin(color, chance)
 
     def cashOutTrigger(self):
-        if self.trigger == False:
+        if len(self.credit.get()) == 0 or len(self.bet.get()) == 0:
+            print("Please insert coins first!")
+            self.infoDisplay("Please insert coins first!", "orange")
+        elif self.trigger is False:
             print("Pick a color first!")
+            self.infoDisplay("Pick a color first!", "orange")
         elif int(self.bet.get()) > 0:
+            print("DONE!")
+            self.infoDisplay("DONE!", "yellow")
             aux = int(self.credit.get())
             self.credit.delete(0, END)
             self.credit.insert(0, aux+int(self.bet.get()))
             self.bet.delete(0, END)
-            self.bet.insert(0, 0)
+            # self.bet.insert(0, 0)
             self.trigger = False
         else:
             print("Try to win first!")
+            self.infoDisplay("Try to win first!", "orange")
+
+    def infoDisplay(self, outputText, color):
+        self.info.configure(state=NORMAL)  # so we can modify it
+        self.info.delete(0, END)
+        self.info.insert(0, outputText)
+        self.info.configure(
+            disabledbackground=color,
+            state=DISABLED  # return to the first state
+        )
+
+    def takeCredit(self):
+        if self.trigger is False:
+            aux = int(self.credit.get())
+            self.credit.delete(0, END)
+            self.credit.insert(0, aux-int(self.bet.get()))
 
     def flipCard(self, chance):
         if 1 <= chance <= 5:
@@ -103,20 +143,23 @@ class Table:
     def checkWin(self, color, chance):
         if color == "red" and 1 <= chance <= 5:
             print("You win!")
+            self.infoDisplay("You win!", "green")
             self.trigger = True
             aux = int(self.bet.get())
             self.bet.delete(0, END)
             self.bet.insert(0, aux*2)
         elif color == "black" and 6 <= chance <= 10:
             print("You win!")
+            self.infoDisplay("You win!", "green")
             self.trigger = True
             aux = int(self.bet.get())
             self.bet.delete(0, END)
             self.bet.insert(0, aux*2)
         else:
             print("You lose!")
+            self.infoDisplay("You lose!", "tomato")
             self.bet.delete(0, END)
-            self.bet.insert(0, 0)
+            #self.bet.insert(0, 0)
             self.trigger = False
 
 
